@@ -61,8 +61,12 @@
   }
 
   function resolveSort(recipe) {
+    // X web "Top" frequently returns empty for min_faves / min_replies / etc.
+    if (recipe && (recipe.forceSort === "live" || recipe.forceSort === "top")) {
+      return recipe.forceSort;
+    }
     if (state.sort === "top" || state.sort === "live") return state.sort;
-    return recipe && recipe.defaultSort === "live" ? "live" : "top";
+    return recipe && recipe.defaultSort === "live" ? "live" : "live";
   }
 
   function runRecipe(recipe) {
@@ -82,6 +86,12 @@
       return;
     }
     var sort = resolveSort(recipe);
+    // Keep panel toggle in sync when recipe forces Latest
+    if (recipe.forceSort === "live" && refs.shadow) {
+      state.sort = "live";
+      updateSegment("sort", "live");
+      persist({ sort: "live" });
+    }
     var url = XSR.buildSearchUrl(query, sort);
     if (state.openInNewTab) {
       window.open(url, "_blank", "noopener,noreferrer");
@@ -113,8 +123,7 @@
       ]);
       var list = el("ul", { className: "xsr-recipe-list" });
       g.items.forEach(function (recipe) {
-        var meta =
-          recipe.defaultSort === "live" ? "Latest rec." : "";
+        var meta = recipe.forceSort === "live" ? "Latest" : "";
         var btn = el(
           "button",
           {
@@ -215,7 +224,7 @@
   function applyStateToUi() {
     updateSegment("threshold", state.threshold);
     var sortUi =
-      state.sort === "live" || state.sort === "top" ? state.sort : "top";
+      state.sort === "top" ? "top" : "live";
     updateSegment("sort", sortUi);
     if (refs.openTab) refs.openTab.checked = !!state.openInNewTab;
     if (refs.panel) refs.panel.hidden = !!state.collapsed;
@@ -295,7 +304,8 @@
         { value: "top", label: "Top" },
         { value: "live", label: "Latest" },
       ],
-      state.sort === "live" ? "live" : "top",
+      // Default Latest: engagement operators often empty on Top
+      state.sort === "top" ? "top" : "live",
       function (v) {
         state.sort = v;
         updateSegment("sort", v);
@@ -408,6 +418,10 @@
         el("div", { className: "xsr-field" }, [
           el("label", { className: "xsr-label", text: "Results" }),
           sortSeg,
+          el("p", {
+            className: "xsr-hint",
+            text: "Tip: min_faves / min_replies need Latest — Top often shows no results.",
+          }),
         ]),
         recipesMount,
         el("div", { className: "xsr-category" }, [

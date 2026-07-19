@@ -1,22 +1,24 @@
 /**
  * Threshold levels for engagement filters.
+ * Tuned for X web search reliability (Top tab often returns empty
+ * for high min_* bars; Soft/Med stay usable on Latest).
  * @namespace XSR
  */
 var XSR = window.XSR || {};
 
 XSR.THRESHOLDS = {
-  soft: { faves: 100, replies: 20, rts: 50 },
-  medium: { faves: 500, replies: 50, rts: 200 },
-  hard: { faves: 2000, replies: 150, rts: 500 },
+  soft: { faves: 50, replies: 10, rts: 20 },
+  medium: { faves: 200, replies: 25, rts: 50 },
+  hard: { faves: 1000, replies: 100, rts: 200 },
 };
 
 XSR.FIXED = {
-  faves_soft: 100,
-  faves_hard: 2000,
-  replies_soft: 20,
-  replies_hard: 150,
-  rts_soft: 50,
-  rts_hard: 500,
+  faves_soft: 50,
+  faves_hard: 1000,
+  replies_soft: 10,
+  replies_hard: 100,
+  rts_soft: 20,
+  rts_hard: 200,
 };
 
 /**

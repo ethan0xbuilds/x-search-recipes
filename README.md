@@ -32,10 +32,16 @@ English-oriented presets so you don’t have to remember operators like `min_fav
 **Example:** keyword `AI` + **Hot takes** (Med) →
 
 ```text
-AI min_faves:500 lang:en -filter:replies
+AI min_faves:200 lang:en -filter:replies
 ```
 
-Global recipes (e.g. **English viral**) work without a keyword.
+Opens on the **Latest** tab (`f=live`). Global recipes (e.g. **English viral**) work without a keyword.
+
+### Important: Top vs Latest
+
+X’s web **Top** results frequently show **“No results”** for engagement operators
+(`min_faves`, `min_replies`, `min_retweets`), even when the same query has plenty
+of hits on **Latest**. Recipes that use those operators force **Latest**.
 
 ## Built-in recipes
 
@@ -56,9 +62,9 @@ Global recipes (e.g. **English viral**) work without a keyword.
 
 | Level | min_faves | min_replies | min_retweets |
 |-------|-----------|-------------|--------------|
-| Soft | 100 | 20 | 50 |
-| Medium | 500 | 50 | 200 |
-| Hard | 2000 | 150 | 500 |
+| Soft | 50 | 10 | 20 |
+| Medium | 200 | 25 | 50 |
+| Hard | 1000 | 100 | 200 |
 
 Some recipes pin soft/hard values (e.g. Viral always uses the hard like bar).
 

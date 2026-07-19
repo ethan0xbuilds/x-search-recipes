@@ -1,5 +1,8 @@
 /**
  * Built-in recipes and template rendering.
+ *
+ * Note: X web "Top" results often return empty for engagement operators
+ * (min_faves / min_replies / min_retweets). Those recipes set forceSort:"live".
  */
 var XSR = window.XSR || {};
 
@@ -11,6 +14,7 @@ var XSR = window.XSR || {};
  * @property {string} label
  * @property {string} template
  * @property {"top"|"live"} defaultSort
+ * @property {"top"|"live"|undefined} forceSort - if set, always use this sort (ignores panel toggle)
  * @property {boolean} requiresQuery
  */
 
@@ -21,8 +25,10 @@ XSR.BUILTIN_RECIPES = [
     category: "quality",
     categoryLabel: "🔥 Quality",
     label: "Hot takes",
+    // Engagement filters need Latest on web; -filter:replies keeps originals
     template: "{q} min_faves:{faves} lang:en -filter:replies",
-    defaultSort: "top",
+    defaultSort: "live",
+    forceSort: "live",
     requiresQuery: true,
   },
   {
@@ -30,8 +36,9 @@ XSR.BUILTIN_RECIPES = [
     category: "quality",
     categoryLabel: "🔥 Quality",
     label: "Viral hits",
-    template: "{q} min_faves:{faves_hard} lang:en",
-    defaultSort: "top",
+    template: "{q} min_faves:{faves_hard} lang:en -filter:replies",
+    defaultSort: "live",
+    forceSort: "live",
     requiresQuery: true,
   },
   {
@@ -40,7 +47,8 @@ XSR.BUILTIN_RECIPES = [
     categoryLabel: "🔥 Quality",
     label: "Deep discussion",
     template: "{q} min_replies:{replies} lang:en -filter:replies",
-    defaultSort: "top",
+    defaultSort: "live",
+    forceSort: "live",
     requiresQuery: true,
   },
   {
@@ -50,6 +58,7 @@ XSR.BUILTIN_RECIPES = [
     label: "Rising (7 days)",
     template: "{q} min_faves:{faves_soft} lang:en since:{since_7d} -filter:replies",
     defaultSort: "live",
+    forceSort: "live",
     requiresQuery: true,
   },
   {
@@ -58,7 +67,7 @@ XSR.BUILTIN_RECIPES = [
     categoryLabel: "📰 Research",
     label: "Verified only",
     template: "{q} filter:verified lang:en -filter:replies",
-    defaultSort: "top",
+    defaultSort: "live",
     requiresQuery: true,
   },
   {
@@ -67,7 +76,8 @@ XSR.BUILTIN_RECIPES = [
     categoryLabel: "📰 Research",
     label: "With sources",
     template: "{q} filter:links min_faves:{faves_soft} lang:en -filter:replies",
-    defaultSort: "top",
+    defaultSort: "live",
+    forceSort: "live",
     requiresQuery: true,
   },
   {
@@ -76,7 +86,8 @@ XSR.BUILTIN_RECIPES = [
     categoryLabel: "🎨 Creators",
     label: "Image winners",
     template: "{q} filter:images min_faves:{faves} lang:en",
-    defaultSort: "top",
+    defaultSort: "live",
+    forceSort: "live",
     requiresQuery: true,
   },
   {
@@ -85,7 +96,8 @@ XSR.BUILTIN_RECIPES = [
     categoryLabel: "🎨 Creators",
     label: "Video winners",
     template: "{q} filter:videos min_faves:{faves} lang:en",
-    defaultSort: "top",
+    defaultSort: "live",
+    forceSort: "live",
     requiresQuery: true,
   },
   {
@@ -104,8 +116,9 @@ XSR.BUILTIN_RECIPES = [
     categoryLabel: "🔬 Market",
     label: "Complaints",
     template:
-      '{q} (sucks OR broken OR frustrating OR "hate this" OR bug) lang:en min_faves:10',
+      '{q} (sucks OR broken OR frustrating OR "hate this" OR bug) lang:en min_faves:{faves_soft}',
     defaultSort: "live",
+    forceSort: "live",
     requiresQuery: true,
   },
   {
@@ -114,8 +127,9 @@ XSR.BUILTIN_RECIPES = [
     categoryLabel: "🔬 Market",
     label: "Alternatives",
     template:
-      '("{q} alternative" OR "vs {q}" OR "instead of {q}") lang:en min_faves:10',
-    defaultSort: "top",
+      '("{q} alternative" OR "vs {q}" OR "instead of {q}") lang:en min_faves:{faves_soft}',
+    defaultSort: "live",
+    forceSort: "live",
     requiresQuery: true,
   },
   {
@@ -124,7 +138,8 @@ XSR.BUILTIN_RECIPES = [
     categoryLabel: "🌍 Global",
     label: "English viral",
     template: "min_faves:{faves_hard} lang:en -filter:replies",
-    defaultSort: "top",
+    defaultSort: "live",
+    forceSort: "live",
     requiresQuery: false,
   },
 ];
@@ -171,7 +186,6 @@ XSR.renderTemplate = function (template, opts) {
   };
 
   var out = template;
-  // Replace longer keys first to avoid partial issues (none currently overlap)
   Object.keys(map)
     .sort(function (a, b) {
       return b.length - a.length;
