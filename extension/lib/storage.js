@@ -9,6 +9,10 @@ XSR.STORAGE_DEFAULTS = {
   openInNewTab: false,
   collapsed: false,
   customRecipes: [],
+  /** @type {{left:number,top:number}|null} panel position in viewport px */
+  panelPos: null,
+  /** @type {{top:number,edge:"right"|"left"}|null} collapsed rail */
+  fabPos: null,
 };
 
 XSR.CUSTOM_LIMITS = {
@@ -18,12 +22,36 @@ XSR.CUSTOM_LIMITS = {
 };
 
 /**
- * @returns {Promise<typeof XSR.STORAGE_DEFAULTS>}
+ * @param {unknown} pos
+ * @returns {{left:number,top:number}|null}
+ */
+XSR.normalizePanelPos = function (pos) {
+  if (!pos || typeof pos !== "object") return null;
+  var left = Number(pos.left);
+  var top = Number(pos.top);
+  if (!isFinite(left) || !isFinite(top)) return null;
+  return { left: left, top: top };
+};
+
+/**
+ * @param {unknown} pos
+ * @returns {{top:number,edge:"right"|"left"}|null}
+ */
+XSR.normalizeFabPos = function (pos) {
+  if (!pos || typeof pos !== "object") return null;
+  var top = Number(pos.top);
+  if (!isFinite(top)) return null;
+  var edge = pos.edge === "left" ? "left" : "right";
+  return { top: top, edge: edge };
+};
+
+/**
+ * @returns {Promise<object>}
  */
 XSR.loadSettings = function () {
   return new Promise(function (resolve) {
     if (!chrome || !chrome.storage || !chrome.storage.sync) {
-      resolve(Object.assign({}, XSR.STORAGE_DEFAULTS));
+      resolve(Object.assign({}, XSR.STORAGE_DEFAULTS, { customRecipes: [] }));
       return;
     }
     chrome.storage.sync.get(XSR.STORAGE_DEFAULTS, function (data) {
@@ -35,13 +63,15 @@ XSR.loadSettings = function () {
         customRecipes: Array.isArray(data.customRecipes)
           ? data.customRecipes
           : [],
+        panelPos: XSR.normalizePanelPos(data.panelPos),
+        fabPos: XSR.normalizeFabPos(data.fabPos),
       });
     });
   });
 };
 
 /**
- * @param {Partial<typeof XSR.STORAGE_DEFAULTS>} partial
+ * @param {object} partial
  * @returns {Promise<void>}
  */
 XSR.saveSettings = function (partial) {

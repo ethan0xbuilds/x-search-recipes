@@ -7,10 +7,12 @@ English-oriented presets so you don’t have to remember operators like `min_fav
 
 ## Features
 
-- Right-side panel on `x.com` / `twitter.com`
+- Floating **X-style card** on `x.com` / `twitter.com` (not DOM-injected into X’s React tree)
+- **Drag** the header to move; position is remembered
+- **Collapse** to an edge rail tab; drag the rail; double-click header or **Reset position**
 - **12 built-in recipes** (quality, research, creators, hiring, market, global)
 - Keyword box + **Soft / Med / Hard** engagement thresholds
-- Top / Latest result mode
+- Top / Latest result mode (engagement recipes force Latest)
 - Optional **Open in new tab**
 - **Custom recipes** (save / run / delete), stored in `chrome.storage.sync`
 - No backend, no analytics
