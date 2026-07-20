@@ -56,11 +56,7 @@ XSR.loadSettings = function () {
     }
     chrome.storage.sync.get(XSR.STORAGE_DEFAULTS, function (data) {
       resolve({
-        threshold: XSR.normalizeThreshold
-          ? XSR.normalizeThreshold(data.threshold)
-          : data.threshold === "strict" || data.threshold === "hard"
-            ? "strict"
-            : "loose",
+        threshold: data.threshold === "strict" ? "strict" : "loose",
         sort: data.sort === "top" || data.sort === "live" ? data.sort : null,
         openInNewTab: !!data.openInNewTab,
         collapsed: !!data.collapsed,

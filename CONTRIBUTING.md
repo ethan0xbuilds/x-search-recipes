@@ -20,7 +20,7 @@ is clearly universal.
 If you do propose a built-in change, include:
 
 1. **Use case** — why it belongs in the core set (not just custom).
-2. **Template** — placeholders (`{q}`, `{faves}`, `{faves_hard}`, `{since_7d}`, etc.).
+2. **Template** — placeholders (`{q}`, `{faves}`, `{faves_loose}`, `{faves_strict}`, `{since_7d}`, etc.).
 3. **Sample** — one fully rendered example query.
 4. **What to remove** — if the list grows past ~6, suggest which button loses.
 

@@ -553,7 +553,7 @@
   }
 
   function syncThresholdSlider() {
-    var level = XSR.normalizeThreshold(state.threshold);
+    var level = state.threshold === "strict" ? "strict" : "loose";
     state.threshold = level;
     if (refs.thresholdRange) {
       refs.thresholdRange.value = level === "strict" ? "1" : "0";
@@ -567,7 +567,7 @@
   }
 
   function setThreshold(level) {
-    state.threshold = XSR.normalizeThreshold(level);
+    state.threshold = level === "strict" ? "strict" : "loose";
     syncThresholdSlider();
     if (refs.thresholdRange) {
       refs.thresholdRange.setAttribute(
@@ -971,7 +971,7 @@
     buildPanel(shadow);
 
     XSR.loadSettings().then(function (settings) {
-      state.threshold = XSR.normalizeThreshold(settings.threshold);
+      state.threshold = settings.threshold === "strict" ? "strict" : "loose";
       state.sort = settings.sort;
       state.openInNewTab = settings.openInNewTab;
       state.collapsed = settings.collapsed;

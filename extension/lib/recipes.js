@@ -97,14 +97,13 @@ XSR.formatUtcDate = function (daysOffset) {
 
 /**
  * @param {string} template
- * @param {{q?: string, threshold?: "loose"|"strict"|string}} opts
+ * @param {{q?: string, threshold?: "loose"|"strict"}} opts
  * @returns {string}
  */
 XSR.renderTemplate = function (template, opts) {
   opts = opts || {};
   var q = (opts.q || "").trim();
-  var level = XSR.normalizeThreshold(opts.threshold);
-  var vals = XSR.getThresholdValues(level);
+  var vals = XSR.getThresholdValues(opts.threshold);
   var fixed = XSR.FIXED;
 
   var map = {
@@ -118,13 +117,6 @@ XSR.renderTemplate = function (template, opts) {
     "{replies_strict}": String(fixed.replies_strict),
     "{rts_loose}": String(fixed.rts_loose),
     "{rts_strict}": String(fixed.rts_strict),
-    // legacy aliases
-    "{faves_soft}": String(fixed.faves_soft),
-    "{faves_hard}": String(fixed.faves_hard),
-    "{replies_soft}": String(fixed.replies_soft),
-    "{replies_hard}": String(fixed.replies_hard),
-    "{rts_soft}": String(fixed.rts_soft),
-    "{rts_hard}": String(fixed.rts_hard),
     "{since_7d}": XSR.formatUtcDate(-7),
     "{today}": XSR.formatUtcDate(0),
   };
