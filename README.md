@@ -17,7 +17,14 @@ English-oriented presets so you don’t have to remember operators like `min_fav
 - **My recipes** for anything custom
 - No backend, no analytics
 
-## Install (development)
+## Install
+
+### Chrome Web Store
+
+Publishing in progress — listing steps are in [`store/LISTING.md`](./store/LISTING.md).  
+Once live, the store link will be added here.
+
+### Development (Load unpacked)
 
 1. Clone this repository.
 2. Open Chrome → `chrome://extensions`.
@@ -25,11 +32,18 @@ English-oriented presets so you don’t have to remember operators like `min_fav
 4. Click **Load unpacked** and select the **`extension/`** directory.
 5. Visit [https://x.com](https://x.com) — the **Search Recipes** panel appears on the right.
 
+### Package a store zip
+
+```bash
+./scripts/package.sh
+# → dist/x-search-recipes-<version>.zip
+```
+
 ## Usage
 
 1. Type a keyword (e.g. `AI`).
-2. Pick a threshold if you want (default **Med**).
-3. Click a recipe — you land on an X search with operators filled in.
+2. Set **Loose** or **Strict** if you want.
+3. Click a filter — you land on an X search with operators filled in.
 
 **Example:** keyword `AI` + **Popular** (Loose) →
 

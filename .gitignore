@@ -1,6 +1,7 @@
 .DS_Store
-*.zip
 node_modules/
 .idea/
 .vscode/
 *.log
+# Built packages (uploaded via GitHub Releases / CWS)
+dist/
