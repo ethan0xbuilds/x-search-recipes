@@ -14,7 +14,7 @@
   var MARGIN = 8;
 
   var state = {
-    threshold: "medium",
+    threshold: "loose",
     sort: null,
     openInNewTab: false,
     collapsed: false,
@@ -541,7 +541,7 @@
   }
 
   function applyStateToUi() {
-    updateSegment("threshold", state.threshold);
+    syncThresholdSlider();
     var sortUi = state.sort === "top" ? "top" : "live";
     updateSegment("sort", sortUi);
     if (refs.openTab) refs.openTab.checked = !!state.openInNewTab;
@@ -550,6 +550,32 @@
     applyPanelPosition();
     applyFabPosition();
     renderCustomList();
+  }
+
+  function syncThresholdSlider() {
+    var level = XSR.normalizeThreshold(state.threshold);
+    state.threshold = level;
+    if (refs.thresholdRange) {
+      refs.thresholdRange.value = level === "strict" ? "1" : "0";
+    }
+    if (refs.thresholdLoose) {
+      refs.thresholdLoose.classList.toggle("xsr-slider-active", level === "loose");
+    }
+    if (refs.thresholdStrict) {
+      refs.thresholdStrict.classList.toggle("xsr-slider-active", level === "strict");
+    }
+  }
+
+  function setThreshold(level) {
+    state.threshold = XSR.normalizeThreshold(level);
+    syncThresholdSlider();
+    if (refs.thresholdRange) {
+      refs.thresholdRange.setAttribute(
+        "aria-valuetext",
+        state.threshold === "strict" ? "Strict" : "Loose"
+      );
+    }
+    persist({ threshold: state.threshold });
   }
 
   function buildPanel(shadow) {
@@ -602,20 +628,55 @@
       return wrap;
     }
 
-    var thresholdSeg = segment(
-      "threshold",
-      [
-        { value: "soft", label: "Soft" },
-        { value: "medium", label: "Med" },
-        { value: "hard", label: "Hard" },
-      ],
-      state.threshold,
-      function (v) {
-        state.threshold = v;
-        updateSegment("threshold", v);
-        persist({ threshold: v });
-      }
-    );
+    var thresholdRange = el("input", {
+      className: "xsr-range",
+      type: "range",
+      attrs: {
+        min: "0",
+        max: "1",
+        step: "1",
+        value: state.threshold === "strict" ? "1" : "0",
+        "aria-label": "Engagement threshold",
+        "aria-valuetext":
+          state.threshold === "strict" ? "Strict" : "Loose",
+      },
+    });
+    var thresholdLoose = el("button", {
+      className: "xsr-slider-label",
+      type: "button",
+      text: "Loose",
+      attrs: { "data-level": "loose" },
+      onClick: function () {
+        setThreshold("loose");
+      },
+    });
+    var thresholdStrict = el("button", {
+      className: "xsr-slider-label",
+      type: "button",
+      text: "Strict",
+      attrs: { "data-level": "strict" },
+      onClick: function () {
+        setThreshold("strict");
+      },
+    });
+    thresholdRange.addEventListener("input", function () {
+      setThreshold(thresholdRange.value === "1" ? "strict" : "loose");
+    });
+    thresholdRange.addEventListener("change", function () {
+      setThreshold(thresholdRange.value === "1" ? "strict" : "loose");
+    });
+
+    var thresholdSlider = el("div", { className: "xsr-slider" }, [
+      el("div", { className: "xsr-slider-labels" }, [
+        thresholdLoose,
+        thresholdStrict,
+      ]),
+      thresholdRange,
+      el("p", {
+        className: "xsr-hint xsr-slider-hint",
+        text: "Loose ≈ 50+ likes · Strict ≈ 500+ likes",
+      }),
+    ]);
 
     var sortSeg = segment(
       "sort",
@@ -762,7 +823,7 @@
           ]),
           el("div", { className: "xsr-field" }, [
             el("label", { className: "xsr-label", text: "Threshold" }),
-            thresholdSeg,
+            thresholdSlider,
           ]),
           el("div", { className: "xsr-field xsr-field-compact" }, [
             el("label", { className: "xsr-label", text: "Results" }),
@@ -879,7 +940,11 @@
       customList: customList,
       openTab: openTab,
       saveForm: saveForm,
+      thresholdRange: thresholdRange,
+      thresholdLoose: thresholdLoose,
+      thresholdStrict: thresholdStrict,
     };
+    syncThresholdSlider();
 
     setupPanelDrag(header, panel);
     setupFabDrag(fab);
@@ -906,7 +971,7 @@
     buildPanel(shadow);
 
     XSR.loadSettings().then(function (settings) {
-      state.threshold = settings.threshold || "medium";
+      state.threshold = XSR.normalizeThreshold(settings.threshold);
       state.sort = settings.sort;
       state.openInNewTab = settings.openInNewTab;
       state.collapsed = settings.collapsed;

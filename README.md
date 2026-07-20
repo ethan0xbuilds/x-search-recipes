@@ -10,8 +10,8 @@ English-oriented presets so you don’t have to remember operators like `min_fav
 - Floating **X-style card** on `x.com` / `twitter.com` (not DOM-injected into X’s React tree)
 - **Drag** the header to move; position is remembered
 - **Collapse** to an edge rail tab; drag the rail; double-click header or **Reset position**
-- **5 core filters** (not a long operator menu): Popular, Viral, This week, Verified, Media
-- Keyword + **Soft / Med / Hard** like threshold
+- **5 core filters**: Popular, Viral, This week, Verified, Media
+- Keyword + **Loose / Strict** threshold slider
 - Top / Latest (core filters use Latest — more reliable for `min_faves`)
 - Optional **Open in new tab**
 - **My recipes** for anything custom
@@ -31,11 +31,13 @@ English-oriented presets so you don’t have to remember operators like `min_fav
 2. Pick a threshold if you want (default **Med**).
 3. Click a recipe — you land on an X search with operators filled in.
 
-**Example:** keyword `AI` + **Popular** (Med) →
+**Example:** keyword `AI` + **Popular** (Loose) →
 
 ```text
-AI min_faves:200 lang:en -filter:replies
+AI min_faves:50 lang:en -filter:replies
 ```
+
+**Strict** uses a higher bar (`min_faves:500` for Popular / Media).
 
 Opens on the **Latest** tab (`f=live`).
 
@@ -56,15 +58,16 @@ X’s web **Top** results often show **“No results”** for engagement operato
 
 Need hiring, complaints, or niche queries? Save them under **My recipes**.
 
-## Thresholds
+## Threshold (Loose / Strict)
+
+Two-stop slider:
 
 | Level | min_faves | min_replies | min_retweets |
 |-------|-----------|-------------|--------------|
-| Soft | 50 | 10 | 20 |
-| Medium | 200 | 25 | 50 |
-| Hard | 1000 | 100 | 200 |
+| **Loose** | 50 | 10 | 20 |
+| **Strict** | 500 | 50 | 100 |
 
-Some recipes pin soft/hard values (e.g. Viral always uses the hard like bar).
+Applies to **Popular** and **Media**. **Viral** always uses the strict like bar; **This week** always uses the loose bar; **Verified** ignores the slider.
 
 ## Custom recipes
 
@@ -75,8 +78,8 @@ Templates may include:
 | Token | Meaning |
 |-------|---------|
 | `{q}` | Keyword |
-| `{faves}` `{replies}` `{rts}` | From selected threshold |
-| `{faves_soft}` `{faves_hard}` | Fixed 100 / 2000 |
+| `{faves}` `{replies}` `{rts}` | From Loose / Strict slider |
+| `{faves_loose}` `{faves_strict}` | Fixed 50 / 500 |
 | `{since_7d}` | UTC date 7 days ago |
 | `{today}` | UTC today |
 

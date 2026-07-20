@@ -41,7 +41,7 @@ XSR.BUILTIN_RECIPES = [
     categoryLabel: "Recipes",
     label: "Viral",
     hint: "Very high likes",
-    template: "{q} min_faves:{faves_hard} lang:en -filter:replies",
+    template: "{q} min_faves:{faves_strict} lang:en -filter:replies",
     defaultSort: "live",
     forceSort: "live",
     requiresQuery: true,
@@ -52,7 +52,7 @@ XSR.BUILTIN_RECIPES = [
     categoryLabel: "Recipes",
     label: "This week",
     hint: "Recent + popular",
-    template: "{q} min_faves:{faves_soft} lang:en since:{since_7d} -filter:replies",
+    template: "{q} min_faves:{faves_loose} lang:en since:{since_7d} -filter:replies",
     defaultSort: "live",
     forceSort: "live",
     requiresQuery: true,
@@ -97,13 +97,13 @@ XSR.formatUtcDate = function (daysOffset) {
 
 /**
  * @param {string} template
- * @param {{q?: string, threshold?: "soft"|"medium"|"hard"}} opts
+ * @param {{q?: string, threshold?: "loose"|"strict"|string}} opts
  * @returns {string}
  */
 XSR.renderTemplate = function (template, opts) {
   opts = opts || {};
   var q = (opts.q || "").trim();
-  var level = opts.threshold || "medium";
+  var level = XSR.normalizeThreshold(opts.threshold);
   var vals = XSR.getThresholdValues(level);
   var fixed = XSR.FIXED;
 
@@ -112,6 +112,13 @@ XSR.renderTemplate = function (template, opts) {
     "{faves}": String(vals.faves),
     "{replies}": String(vals.replies),
     "{rts}": String(vals.rts),
+    "{faves_loose}": String(fixed.faves_loose),
+    "{faves_strict}": String(fixed.faves_strict),
+    "{replies_loose}": String(fixed.replies_loose),
+    "{replies_strict}": String(fixed.replies_strict),
+    "{rts_loose}": String(fixed.rts_loose),
+    "{rts_strict}": String(fixed.rts_strict),
+    // legacy aliases
     "{faves_soft}": String(fixed.faves_soft),
     "{faves_hard}": String(fixed.faves_hard),
     "{replies_soft}": String(fixed.replies_soft),
