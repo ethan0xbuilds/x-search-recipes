@@ -46,9 +46,7 @@
   color: var(--xsr-text);
 }
 
-.xsr-panel.xsr-placed {
-  right: auto;
-}
+/* Position applied via inline left/right + top from JS (default: right edge) */
 
 .xsr-panel.xsr-dragging {
   opacity: 0.96;

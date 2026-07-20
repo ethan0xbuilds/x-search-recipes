@@ -8,8 +8,8 @@ English-oriented presets so you don’t have to remember operators like `min_fav
 ## Features
 
 - Floating **X-style card** on `x.com` / `twitter.com` (not DOM-injected into X’s React tree)
-- **Drag** the header to move; position is remembered
-- **Collapse** to an edge rail tab; drag the rail; double-click header or **Reset position**
+- **Defaults to the right**; drag header/rail to move (e.g. left); position is remembered
+- **Collapse** to an edge rail tab; double-click header or **Reset position** to restore right default
 - **5 core filters**: Popular, Viral, This week, Verified, Media
 - Keyword + **Loose / Strict** threshold slider
 - Top / Latest (core filters use Latest — more reliable for `min_faves`)

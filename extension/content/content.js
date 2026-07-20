@@ -136,24 +136,19 @@
     };
   }
 
+  /** Default: right edge card (matches collapsed rail). */
   function defaultPanelPos() {
-    var vp = viewport();
-    var w = Math.min(PANEL_W, vp.w - MARGIN * 2);
-    return {
-      left: Math.max(MARGIN, vp.w - w - 16),
-      top: 56,
-    };
+    return { edge: "right", top: 56, inset: 16 };
   }
 
-  function clampPanelPos(left, top) {
-    var vp = viewport();
-    var panel = refs.panel;
-    var w = panel ? panel.offsetWidth || PANEL_W : PANEL_W;
-    var h = panel ? panel.offsetHeight || 320 : 320;
-    return {
-      left: clamp(left, MARGIN, Math.max(MARGIN, vp.w - w - MARGIN)),
-      top: clamp(top, MARGIN, Math.max(MARGIN, vp.h - Math.min(h, vp.h - MARGIN) - MARGIN)),
-    };
+  function defaultFabPos() {
+    return { top: 120, edge: "right" };
+  }
+
+  function panelWidth() {
+    return refs.panel && refs.panel.offsetWidth
+      ? refs.panel.offsetWidth
+      : PANEL_W;
   }
 
   function clampFabTop(top) {
@@ -161,41 +156,132 @@
     return clamp(top, MARGIN, Math.max(MARGIN, vp.h - 80));
   }
 
+  function clampPanelTop(top) {
+    var vp = viewport();
+    var h =
+      refs.panel && refs.panel.offsetHeight
+        ? refs.panel.offsetHeight
+        : 320;
+    return clamp(
+      top,
+      MARGIN,
+      Math.max(MARGIN, vp.h - Math.min(h, vp.h - MARGIN) - MARGIN)
+    );
+  }
+
+  function clampInset(inset, edge) {
+    var vp = viewport();
+    var w = panelWidth();
+    var maxInset = Math.max(MARGIN, vp.w - w - MARGIN);
+    return clamp(inset != null ? inset : 16, MARGIN, maxInset);
+  }
+
+  /**
+   * Normalize any panel pos to { edge, top, inset }. Default right.
+   * @param {object|null} pos
+   */
+  function normalizePanelPosState(pos) {
+    if (!pos || typeof pos !== "object") return defaultPanelPos();
+    var top = clampPanelTop(pos.top != null ? pos.top : 56);
+    if (pos.edge === "left" || pos.edge === "right") {
+      return {
+        edge: pos.edge,
+        top: top,
+        inset: clampInset(pos.inset, pos.edge),
+      };
+    }
+    // Absolute left from older sessions during drag only — map to edge
+    if (isFinite(Number(pos.left))) {
+      var left = Number(pos.left);
+      var vp = viewport();
+      var w = panelWidth();
+      var mid = left + w / 2;
+      if (mid < vp.w / 2) {
+        return { edge: "left", top: top, inset: clampInset(left, "left") };
+      }
+      return {
+        edge: "right",
+        top: top,
+        inset: clampInset(vp.w - left - w, "right"),
+      };
+    }
+    return defaultPanelPos();
+  }
+
+  /** Convert edge pos → viewport left for dragging. */
+  function panelLeftFromPos(pos) {
+    var p = normalizePanelPosState(pos);
+    var vp = viewport();
+    var w = panelWidth();
+    if (p.edge === "left") return p.inset;
+    return Math.max(MARGIN, vp.w - w - p.inset);
+  }
+
+  /** Absolute left/top during drag → stored edge pos. */
+  function panelPosFromLeftTop(left, top) {
+    var vp = viewport();
+    var w = panelWidth();
+    var maxLeft = Math.max(MARGIN, vp.w - w - MARGIN);
+    left = clamp(left, MARGIN, maxLeft);
+    top = clampPanelTop(top);
+    // Snap near edges to that edge
+    if (left + w > vp.w - EDGE_SNAP_PX) {
+      return {
+        edge: "right",
+        top: top,
+        inset: clampInset(vp.w - left - w, "right"),
+      };
+    }
+    if (left < EDGE_SNAP_PX) {
+      return { edge: "left", top: top, inset: clampInset(left, "left") };
+    }
+    // Free float: still store as nearest edge so expand/collapse stay consistent
+    var mid = left + w / 2;
+    if (mid < vp.w / 2) {
+      return { edge: "left", top: top, inset: clampInset(left, "left") };
+    }
+    return {
+      edge: "right",
+      top: top,
+      inset: clampInset(vp.w - left - w, "right"),
+    };
+  }
+
   function applyPanelPosition() {
     if (!refs.panel) return;
-    var pos = state.panelPos ? clampPanelPos(state.panelPos.left, state.panelPos.top) : null;
-    if (!pos) {
-      refs.panel.classList.remove("xsr-placed");
-      refs.panel.style.left = "";
-      refs.panel.style.top = "";
-      refs.panel.style.right = "";
-      return;
-    }
+    var pos = normalizePanelPosState(state.panelPos);
     state.panelPos = pos;
     refs.panel.classList.add("xsr-placed");
-    refs.panel.style.left = pos.left + "px";
     refs.panel.style.top = pos.top + "px";
-    refs.panel.style.right = "auto";
+    if (pos.edge === "left") {
+      refs.panel.style.left = pos.inset + "px";
+      refs.panel.style.right = "auto";
+    } else {
+      // Prefer CSS right so “default right” cannot flip on odd left math
+      refs.panel.style.right = pos.inset + "px";
+      refs.panel.style.left = "auto";
+    }
   }
 
   function applyFabPosition() {
     if (!refs.fab) return;
     var fabPos = state.fabPos;
-    if (!fabPos && state.panelPos) {
-      fabPos = {
-        top: state.panelPos.top,
-        edge:
-          state.panelPos.left + PANEL_W / 2 < viewport().w / 2 ? "left" : "right",
-      };
-    }
-    if (!fabPos) {
-      refs.fab.style.top = "";
-      refs.fab.style.right = "";
-      refs.fab.style.left = "";
-      refs.fab.classList.remove("xsr-fab-left");
-      return;
+    if (!fabPos || (fabPos.edge !== "left" && fabPos.edge !== "right")) {
+      // Derive from panel edge, else hard-default right
+      if (state.panelPos && state.panelPos.edge === "left") {
+        fabPos = {
+          top: state.panelPos.top != null ? state.panelPos.top : 120,
+          edge: "left",
+        };
+      } else {
+        fabPos = defaultFabPos();
+        if (state.panelPos && state.panelPos.top != null) {
+          fabPos.top = state.panelPos.top;
+        }
+      }
     }
     var top = clampFabTop(fabPos.top);
+    // Only left if explicitly stored as left — never default left
     var edge = fabPos.edge === "left" ? "left" : "right";
     state.fabPos = { top: top, edge: edge };
     refs.fab.style.top = top + "px";
@@ -218,40 +304,46 @@
     persist({ panelPos: state.panelPos, fabPos: state.fabPos });
   }
 
-  /**
-   * Place the panel as if it expands out of the edge rail tab.
-   * Right rail → panel on the right; left rail → panel on the left.
-   */
+  /** Expand from rail: same edge as the tab (default right). */
   function panelPosFromFab() {
-    var vp = viewport();
-    var w = Math.min(PANEL_W, vp.w - MARGIN * 2);
-    var fab = state.fabPos || { top: 56, edge: "right" };
-    var edge = fab.edge === "left" ? "left" : "right";
-    var top = clampFabTop(fab.top != null ? fab.top : 56);
-    var left =
-      edge === "left"
-        ? 12
-        : Math.max(MARGIN, vp.w - w - 12);
-    return clampPanelPos(left, top);
+    var fab = ensureFabPos();
+    return {
+      edge: fab.edge === "left" ? "left" : "right",
+      top: clampPanelTop(fab.top),
+      inset: 16,
+    };
   }
 
-  /** Default rail when none is stored: right edge, near panel top. */
+  /** Rail position: explicit, or panel edge, or right. */
   function ensureFabPos() {
-    if (state.fabPos && (state.fabPos.edge === "left" || state.fabPos.edge === "right")) {
+    if (state.fabPos && state.fabPos.edge === "left") {
       state.fabPos = {
-        top: clampFabTop(state.fabPos.top != null ? state.fabPos.top : 56),
-        edge: state.fabPos.edge,
+        top: clampFabTop(state.fabPos.top != null ? state.fabPos.top : 120),
+        edge: "left",
       };
       return state.fabPos;
     }
-    if (state.panelPos) {
-      var mid = state.panelPos.left + PANEL_W / 2;
+    if (state.fabPos && state.fabPos.edge === "right") {
+      state.fabPos = {
+        top: clampFabTop(state.fabPos.top != null ? state.fabPos.top : 120),
+        edge: "right",
+      };
+      return state.fabPos;
+    }
+    if (state.panelPos && state.panelPos.edge === "left") {
       state.fabPos = {
         top: clampFabTop(state.panelPos.top),
-        edge: mid < viewport().w / 2 ? "left" : "right",
+        edge: "left",
       };
     } else {
-      state.fabPos = { top: 56, edge: "right" };
+      state.fabPos = {
+        top: clampFabTop(
+          state.panelPos && state.panelPos.top != null
+            ? state.panelPos.top
+            : 120
+        ),
+        edge: "right",
+      };
     }
     return state.fabPos;
   }
@@ -337,25 +429,22 @@
         return panel.getBoundingClientRect();
       },
       function (left, top) {
-        var pos = clampPanelPos(left, top);
-        state.panelPos = pos;
-        applyPanelPosition();
+        // During drag use absolute left for smooth movement
+        state.panelPos = panelPosFromLeftTop(left, top);
+        // Paint with absolute left while dragging (smoother than edge flip)
+        panel.style.left = panelLeftFromPos(state.panelPos) + "px";
+        panel.style.right = "auto";
+        panel.style.top = state.panelPos.top + "px";
       },
       function () {
-        // Snap to right or left edge if close
-        var pos = state.panelPos || defaultPanelPos();
-        var vp = viewport();
-        var w = panel.offsetWidth || PANEL_W;
-        if (pos.left + w > vp.w - EDGE_SNAP_PX) {
-          pos = clampPanelPos(vp.w - w - 12, pos.top);
-        } else if (pos.left < EDGE_SNAP_PX) {
-          pos = clampPanelPos(12, pos.top);
-        }
+        var pos = normalizePanelPosState(state.panelPos);
+        // Prefer snap to nearest side
+        var left = panelLeftFromPos(pos);
+        pos = panelPosFromLeftTop(left, pos.top);
         state.panelPos = pos;
-        // Keep rail near panel
         state.fabPos = {
           top: pos.top,
-          edge: pos.left + w / 2 < vp.w / 2 ? "left" : "right",
+          edge: pos.edge === "left" ? "left" : "right",
         };
         applyPanelPosition();
         applyFabPosition();
@@ -497,18 +586,13 @@
     if (refs.panel) refs.panel.hidden = collapsed;
     if (refs.fab) refs.fab.hidden = !collapsed;
     if (collapsed) {
-      // Rail follows the panel side (defaults to right)
-      if (state.panelPos) {
-        state.fabPos = {
-          top: clampFabTop(state.panelPos.top),
-          edge:
-            state.panelPos.left + PANEL_W / 2 < viewport().w / 2
-              ? "left"
-              : "right",
-        };
-      } else {
-        ensureFabPos();
-      }
+      // Rail follows panel edge; missing edge → right
+      var p = normalizePanelPosState(state.panelPos);
+      state.panelPos = p;
+      state.fabPos = {
+        top: clampFabTop(p.top),
+        edge: p.edge === "left" ? "left" : "right",
+      };
       applyFabPosition();
       persist({
         collapsed: true,
@@ -516,7 +600,7 @@
         panelPos: state.panelPos,
       });
     } else {
-      // Expand out of the rail — same edge as the tab (usually right)
+      // Expand from rail (default right)
       ensureFabPos();
       state.panelPos = panelPosFromFab();
       applyPanelPosition();
@@ -951,10 +1035,8 @@
     renderRecipeGroups(recipesMount);
 
     window.addEventListener("resize", function () {
-      if (state.panelPos) {
-        state.panelPos = clampPanelPos(state.panelPos.left, state.panelPos.top);
-        applyPanelPosition();
-      }
+      state.panelPos = normalizePanelPosState(state.panelPos);
+      applyPanelPosition();
       applyFabPosition();
     });
   }
@@ -970,17 +1052,34 @@
     var shadow = host.attachShadow({ mode: "open" });
     buildPanel(shadow);
 
+    // Paint right-side defaults immediately (before storage returns)
+    state.panelPos = defaultPanelPos();
+    state.fabPos = defaultFabPos();
+    applyPanelPosition();
+    applyFabPosition();
+
     XSR.loadSettings().then(function (settings) {
       state.threshold = settings.threshold === "strict" ? "strict" : "loose";
       state.sort = settings.sort;
       state.openInNewTab = settings.openInNewTab;
       state.collapsed = settings.collapsed;
       state.customRecipes = settings.customRecipes || [];
-      state.panelPos = settings.panelPos;
-      state.fabPos = settings.fabPos;
-      // First run: place like a right-rail card
-      if (!state.panelPos) {
+      // Only override defaults when user has a valid saved edge position
+      if (settings.panelPos) {
+        state.panelPos = normalizePanelPosState(settings.panelPos);
+      } else {
         state.panelPos = defaultPanelPos();
+      }
+      if (settings.fabPos && (settings.fabPos.edge === "left" || settings.fabPos.edge === "right")) {
+        state.fabPos = {
+          top: clampFabTop(settings.fabPos.top),
+          edge: settings.fabPos.edge === "left" ? "left" : "right",
+        };
+      } else {
+        state.fabPos = {
+          top: clampFabTop(state.panelPos.top),
+          edge: state.panelPos.edge === "left" ? "left" : "right",
+        };
       }
       applyStateToUi();
       syncKeywordFromUrl();

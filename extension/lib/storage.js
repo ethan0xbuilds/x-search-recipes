@@ -9,9 +9,12 @@ XSR.STORAGE_DEFAULTS = {
   openInNewTab: false,
   collapsed: false,
   customRecipes: [],
-  /** @type {{left:number,top:number}|null} panel position in viewport px */
+  /**
+   * Panel: edge-anchored { edge: "right"|"left", top, inset }.
+   * Default (null) = right side.
+   */
   panelPos: null,
-  /** @type {{top:number,edge:"right"|"left"}|null} collapsed rail */
+  /** Collapsed rail: { top, edge: "right"|"left" }. Default null = right. */
   fabPos: null,
 };
 
@@ -23,14 +26,20 @@ XSR.CUSTOM_LIMITS = {
 
 /**
  * @param {unknown} pos
- * @returns {{left:number,top:number}|null}
+ * @returns {{edge:"right"|"left", top:number, inset:number}|null}
  */
 XSR.normalizePanelPos = function (pos) {
   if (!pos || typeof pos !== "object") return null;
-  var left = Number(pos.left);
   var top = Number(pos.top);
-  if (!isFinite(left) || !isFinite(top)) return null;
-  return { left: left, top: top };
+  if (!isFinite(top)) return null;
+  var inset = Number(pos.inset);
+  if (!isFinite(inset)) inset = 16;
+  inset = Math.max(0, inset);
+  // Prefer explicit edge; otherwise ignore broken absolute left-only blobs
+  if (pos.edge === "left" || pos.edge === "right") {
+    return { edge: pos.edge, top: top, inset: inset };
+  }
+  return null;
 };
 
 /**
@@ -41,6 +50,7 @@ XSR.normalizeFabPos = function (pos) {
   if (!pos || typeof pos !== "object") return null;
   var top = Number(pos.top);
   if (!isFinite(top)) return null;
+  // Default missing/invalid edge to right (never guess left)
   var edge = pos.edge === "left" ? "left" : "right";
   return { top: top, edge: edge };
 };
