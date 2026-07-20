@@ -3,6 +3,9 @@
 One-click **advanced search recipes** for [X](https://x.com) (Twitter).  
 English-oriented presets so you don’t have to remember operators like `min_faves:` or `lang:en`.
 
+**Homepage:** https://github.com/ethan0xbuilds/x-search-recipes  
+**Author site:** [oasaka.xyz](https://oasaka.xyz)
+
 > Not affiliated with X Corp. or Twitter.
 
 ## Features

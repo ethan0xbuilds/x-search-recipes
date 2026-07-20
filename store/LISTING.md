@@ -8,8 +8,12 @@ Use these fields in [Chrome Web Store Developer Dashboard](https://chrome.google
 |-------|--------|
 | **Name** | X Search Recipes |
 | **Summary** (132 chars max) | One-click advanced search filters for X (Twitter): Popular, Viral, This week, Verified, Media. |
+| **Official URL** | `https://github.com/ethan0xbuilds/x-search-recipes` |
 | **Category** | Productivity |
 | **Language** | English |
+
+> **Official URL** goes in the Chrome Web Store “Website” / homepage field.  
+> Use the GitHub repo (docs, source, issues). Personal site [oasaka.xyz](https://oasaka.xyz) lists it under works, but the extension’s homepage should stay on GitHub.
 
 ### Detailed description
 
