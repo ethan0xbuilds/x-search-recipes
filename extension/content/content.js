@@ -219,6 +219,44 @@
   }
 
   /**
+   * Place the panel as if it expands out of the edge rail tab.
+   * Right rail → panel on the right; left rail → panel on the left.
+   */
+  function panelPosFromFab() {
+    var vp = viewport();
+    var w = Math.min(PANEL_W, vp.w - MARGIN * 2);
+    var fab = state.fabPos || { top: 56, edge: "right" };
+    var edge = fab.edge === "left" ? "left" : "right";
+    var top = clampFabTop(fab.top != null ? fab.top : 56);
+    var left =
+      edge === "left"
+        ? 12
+        : Math.max(MARGIN, vp.w - w - 12);
+    return clampPanelPos(left, top);
+  }
+
+  /** Default rail when none is stored: right edge, near panel top. */
+  function ensureFabPos() {
+    if (state.fabPos && (state.fabPos.edge === "left" || state.fabPos.edge === "right")) {
+      state.fabPos = {
+        top: clampFabTop(state.fabPos.top != null ? state.fabPos.top : 56),
+        edge: state.fabPos.edge,
+      };
+      return state.fabPos;
+    }
+    if (state.panelPos) {
+      var mid = state.panelPos.left + PANEL_W / 2;
+      state.fabPos = {
+        top: clampFabTop(state.panelPos.top),
+        edge: mid < viewport().w / 2 ? "left" : "right",
+      };
+    } else {
+      state.fabPos = { top: 56, edge: "right" };
+    }
+    return state.fabPos;
+  }
+
+  /**
    * Drag with pointer events. onCommit(left, top) after release.
    * Returns true if a drag occurred (moved past threshold) so click can be ignored.
    */
@@ -465,21 +503,35 @@
     if (refs.panel) refs.panel.hidden = collapsed;
     if (refs.fab) refs.fab.hidden = !collapsed;
     if (collapsed) {
-      // Prefer rail beside last panel position
-      if (state.panelPos && !state.fabPos) {
+      // Rail follows the panel side (defaults to right)
+      if (state.panelPos) {
         state.fabPos = {
-          top: state.panelPos.top,
+          top: clampFabTop(state.panelPos.top),
           edge:
             state.panelPos.left + PANEL_W / 2 < viewport().w / 2
               ? "left"
               : "right",
         };
+      } else {
+        ensureFabPos();
       }
       applyFabPosition();
+      persist({
+        collapsed: true,
+        fabPos: state.fabPos,
+        panelPos: state.panelPos,
+      });
     } else {
+      // Expand out of the rail — same edge as the tab (usually right)
+      ensureFabPos();
+      state.panelPos = panelPosFromFab();
       applyPanelPosition();
+      persist({
+        collapsed: false,
+        panelPos: state.panelPos,
+        fabPos: state.fabPos,
+      });
     }
-    persist({ collapsed: collapsed, fabPos: state.fabPos });
   }
 
   function updateSegment(group, value) {

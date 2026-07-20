@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "X Search Recipes",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "One-click advanced search recipes for X (Twitter). English-oriented presets for quality, research, hiring, and more.",
   "permissions": ["storage"],
   "host_permissions": ["https://x.com/*", "https://twitter.com/*"],
