@@ -250,6 +250,27 @@
   padding-top: 4px;
 }
 
+.xsr-recipe-list-core {
+  gap: 4px;
+}
+
+.xsr-recipe-list-core .xsr-recipe-btn {
+  background: rgba(231, 233, 234, 0.03);
+  border: 1px solid var(--xsr-border);
+  border-radius: 12px;
+  padding: 11px 14px;
+  font-weight: 600;
+}
+
+.xsr-recipe-list-core .xsr-recipe-btn:hover {
+  background: rgba(29, 155, 240, 0.1);
+  border-color: rgba(29, 155, 240, 0.35);
+}
+
+.xsr-field-compact {
+  margin-bottom: 8px;
+}
+
 .xsr-category-title {
   font-size: 13px;
   font-weight: 700;

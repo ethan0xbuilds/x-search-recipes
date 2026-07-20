@@ -412,34 +412,28 @@
 
   function renderRecipeGroups(container) {
     container.textContent = "";
-    var groups = XSR.groupRecipes(XSR.BUILTIN_RECIPES);
-    groups.forEach(function (g) {
-      var section = el("div", { className: "xsr-category" }, [
-        el("h3", { className: "xsr-category-title", text: g.label }),
-      ]);
-      var list = el("ul", { className: "xsr-recipe-list" });
-      g.items.forEach(function (recipe) {
-        var meta = recipe.forceSort === "live" ? "Latest" : "";
-        var btn = el(
-          "button",
-          {
-            className: "xsr-recipe-btn",
-            type: "button",
-            title: recipe.template,
-            onClick: function () {
-              runRecipe(recipe);
-            },
+    // Flat list — no category chrome (builtins are a short core set)
+    var list = el("ul", { className: "xsr-recipe-list xsr-recipe-list-core" });
+    XSR.BUILTIN_RECIPES.forEach(function (recipe) {
+      var meta = recipe.hint || "";
+      var btn = el(
+        "button",
+        {
+          className: "xsr-recipe-btn",
+          type: "button",
+          title: recipe.template,
+          onClick: function () {
+            runRecipe(recipe);
           },
-          [
-            el("span", { text: recipe.label }),
-            meta ? el("span", { className: "xsr-recipe-meta", text: meta }) : null,
-          ]
-        );
-        list.appendChild(el("li", null, [btn]));
-      });
-      section.appendChild(list);
-      container.appendChild(section);
+        },
+        [
+          el("span", { text: recipe.label }),
+          meta ? el("span", { className: "xsr-recipe-meta", text: meta }) : null,
+        ]
+      );
+      list.appendChild(el("li", null, [btn]));
     });
+    container.appendChild(list);
   }
 
   function renderCustomList() {
@@ -732,7 +726,7 @@
         el("h2", { className: "xsr-title", text: "Search Recipes" }),
         el("p", {
           className: "xsr-subtitle",
-          text: "Advanced search, one click",
+          text: "Type a keyword, pick a filter",
         }),
       ]),
       el("div", { className: "xsr-header-actions" }, [
@@ -770,15 +764,14 @@
             el("label", { className: "xsr-label", text: "Threshold" }),
             thresholdSeg,
           ]),
-          el("div", { className: "xsr-field" }, [
+          el("div", { className: "xsr-field xsr-field-compact" }, [
             el("label", { className: "xsr-label", text: "Results" }),
             sortSeg,
-            el("p", {
-              className: "xsr-hint",
-              text: "Engagement filters need Latest — Top often shows no results.",
-            }),
           ]),
-          recipesMount,
+          el("div", { className: "xsr-field" }, [
+            el("label", { className: "xsr-label", text: "Quick filters" }),
+            recipesMount,
+          ]),
           el("div", { className: "xsr-category" }, [
             el("h3", { className: "xsr-category-title", text: "My recipes" }),
             customList,

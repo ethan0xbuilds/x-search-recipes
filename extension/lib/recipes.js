@@ -1,8 +1,8 @@
 /**
  * Built-in recipes and template rendering.
  *
- * Note: X web "Top" results often return empty for engagement operators
- * (min_faves / min_replies / min_retweets). Those recipes set forceSort:"live".
+ * Keep the list short — a few high-traffic actions beat a long menu.
+ * Engagement operators need Latest on X web (forceSort: "live").
  */
 var XSR = window.XSR || {};
 
@@ -12,20 +12,24 @@ var XSR = window.XSR || {};
  * @property {string} category
  * @property {string} categoryLabel
  * @property {string} label
+ * @property {string} [hint] - short secondary text in the list
  * @property {string} template
  * @property {"top"|"live"} defaultSort
- * @property {"top"|"live"|undefined} forceSort - if set, always use this sort (ignores panel toggle)
+ * @property {"top"|"live"|undefined} forceSort
  * @property {boolean} requiresQuery
  */
 
-/** @type {Recipe[]} */
+/**
+ * Core presets only. Power users can add more under My recipes.
+ * @type {Recipe[]}
+ */
 XSR.BUILTIN_RECIPES = [
   {
-    id: "hot-takes",
-    category: "quality",
-    categoryLabel: "🔥 Quality",
-    label: "Hot takes",
-    // Engagement filters need Latest on web; -filter:replies keeps originals
+    id: "popular",
+    category: "core",
+    categoryLabel: "Recipes",
+    label: "Popular",
+    hint: "High likes",
     template: "{q} min_faves:{faves} lang:en -filter:replies",
     defaultSort: "live",
     forceSort: "live",
@@ -33,29 +37,21 @@ XSR.BUILTIN_RECIPES = [
   },
   {
     id: "viral",
-    category: "quality",
-    categoryLabel: "🔥 Quality",
-    label: "Viral hits",
+    category: "core",
+    categoryLabel: "Recipes",
+    label: "Viral",
+    hint: "Very high likes",
     template: "{q} min_faves:{faves_hard} lang:en -filter:replies",
     defaultSort: "live",
     forceSort: "live",
     requiresQuery: true,
   },
   {
-    id: "deep",
-    category: "quality",
-    categoryLabel: "🔥 Quality",
-    label: "Deep discussion",
-    template: "{q} min_replies:{replies} lang:en -filter:replies",
-    defaultSort: "live",
-    forceSort: "live",
-    requiresQuery: true,
-  },
-  {
-    id: "rising",
-    category: "quality",
-    categoryLabel: "🔥 Quality",
-    label: "Rising (7 days)",
+    id: "this-week",
+    category: "core",
+    categoryLabel: "Recipes",
+    label: "This week",
+    hint: "Recent + popular",
     template: "{q} min_faves:{faves_soft} lang:en since:{since_7d} -filter:replies",
     defaultSort: "live",
     forceSort: "live",
@@ -63,84 +59,25 @@ XSR.BUILTIN_RECIPES = [
   },
   {
     id: "verified",
-    category: "research",
-    categoryLabel: "📰 Research",
-    label: "Verified only",
+    category: "core",
+    categoryLabel: "Recipes",
+    label: "Verified",
+    hint: "Verified accounts",
     template: "{q} filter:verified lang:en -filter:replies",
     defaultSort: "live",
-    requiresQuery: true,
-  },
-  {
-    id: "sources",
-    category: "research",
-    categoryLabel: "📰 Research",
-    label: "With sources",
-    template: "{q} filter:links min_faves:{faves_soft} lang:en -filter:replies",
-    defaultSort: "live",
     forceSort: "live",
     requiresQuery: true,
   },
   {
-    id: "images",
-    category: "creators",
-    categoryLabel: "🎨 Creators",
-    label: "Image winners",
-    template: "{q} filter:images min_faves:{faves} lang:en",
+    id: "media",
+    category: "core",
+    categoryLabel: "Recipes",
+    label: "Media",
+    hint: "Images & video",
+    template: "{q} filter:media min_faves:{faves} lang:en",
     defaultSort: "live",
     forceSort: "live",
     requiresQuery: true,
-  },
-  {
-    id: "videos",
-    category: "creators",
-    categoryLabel: "🎨 Creators",
-    label: "Video winners",
-    template: "{q} filter:videos min_faves:{faves} lang:en",
-    defaultSort: "live",
-    forceSort: "live",
-    requiresQuery: true,
-  },
-  {
-    id: "hiring",
-    category: "opportunities",
-    categoryLabel: "💼 Opportunities",
-    label: "Hiring",
-    template:
-      '({q}) ("we\'re hiring" OR "is hiring" OR "job opening" OR hiring) lang:en -filter:replies',
-    defaultSort: "live",
-    requiresQuery: true,
-  },
-  {
-    id: "complaints",
-    category: "market",
-    categoryLabel: "🔬 Market",
-    label: "Complaints",
-    template:
-      '{q} (sucks OR broken OR frustrating OR "hate this" OR bug) lang:en min_faves:{faves_soft}',
-    defaultSort: "live",
-    forceSort: "live",
-    requiresQuery: true,
-  },
-  {
-    id: "alternatives",
-    category: "market",
-    categoryLabel: "🔬 Market",
-    label: "Alternatives",
-    template:
-      '("{q} alternative" OR "vs {q}" OR "instead of {q}") lang:en min_faves:{faves_soft}',
-    defaultSort: "live",
-    forceSort: "live",
-    requiresQuery: true,
-  },
-  {
-    id: "global-viral",
-    category: "global",
-    categoryLabel: "🌍 Global",
-    label: "English viral",
-    template: "min_faves:{faves_hard} lang:en -filter:replies",
-    defaultSort: "live",
-    forceSort: "live",
-    requiresQuery: false,
   },
 ];
 

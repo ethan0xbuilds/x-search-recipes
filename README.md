@@ -10,11 +10,11 @@ English-oriented presets so you don’t have to remember operators like `min_fav
 - Floating **X-style card** on `x.com` / `twitter.com` (not DOM-injected into X’s React tree)
 - **Drag** the header to move; position is remembered
 - **Collapse** to an edge rail tab; drag the rail; double-click header or **Reset position**
-- **12 built-in recipes** (quality, research, creators, hiring, market, global)
-- Keyword box + **Soft / Med / Hard** engagement thresholds
-- Top / Latest result mode (engagement recipes force Latest)
+- **5 core filters** (not a long operator menu): Popular, Viral, This week, Verified, Media
+- Keyword + **Soft / Med / Hard** like threshold
+- Top / Latest (core filters use Latest — more reliable for `min_faves`)
 - Optional **Open in new tab**
-- **Custom recipes** (save / run / delete), stored in `chrome.storage.sync`
+- **My recipes** for anything custom
 - No backend, no analytics
 
 ## Install (development)
@@ -31,34 +31,30 @@ English-oriented presets so you don’t have to remember operators like `min_fav
 2. Pick a threshold if you want (default **Med**).
 3. Click a recipe — you land on an X search with operators filled in.
 
-**Example:** keyword `AI` + **Hot takes** (Med) →
+**Example:** keyword `AI` + **Popular** (Med) →
 
 ```text
 AI min_faves:200 lang:en -filter:replies
 ```
 
-Opens on the **Latest** tab (`f=live`). Global recipes (e.g. **English viral**) work without a keyword.
+Opens on the **Latest** tab (`f=live`).
 
 ### Important: Top vs Latest
 
-X’s web **Top** results frequently show **“No results”** for engagement operators
-(`min_faves`, `min_replies`, `min_retweets`), even when the same query has plenty
-of hits on **Latest**. Recipes that use those operators force **Latest**.
+X’s web **Top** results often show **“No results”** for engagement operators
+(`min_faves`, etc.). Built-in filters force **Latest**.
 
-## Built-in recipes
+## Built-in filters (5)
 
-| Category | Recipe | Idea |
-|----------|--------|------|
-| Quality | Hot takes | High-like originals (`-filter:replies`) |
-| Quality | Viral hits | Very high likes (hard bar) |
-| Quality | Deep discussion | High reply count |
-| Quality | Rising (7 days) | Recent + soft engagement floor |
-| Research | Verified only | `filter:verified` |
-| Research | With sources | Posts with links |
-| Creators | Image / Video winners | Media + engagement |
-| Opportunities | Hiring | Hiring-related phrases |
-| Market | Complaints / Alternatives | Pain points & competitors |
-| Global | English viral | No keyword; site-wide high likes |
+| Button | What it does |
+|--------|----------------|
+| **Popular** | High-like originals (`min_faves` + `-filter:replies`) |
+| **Viral** | Much higher like bar |
+| **This week** | Last 7 days + soft popularity floor |
+| **Verified** | Verified accounts only |
+| **Media** | Images / video + likes |
+
+Need hiring, complaints, or niche queries? Save them under **My recipes**.
 
 ## Thresholds
 

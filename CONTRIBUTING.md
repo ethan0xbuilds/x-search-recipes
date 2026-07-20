@@ -13,14 +13,18 @@ After code changes, click **Reload** on the extension card, then refresh the X t
 
 ## Recipe pull requests
 
-New built-in recipes are welcome. Please include:
+Built-ins stay **minimal** (a handful of core filters). Prefer proposing
+additions as optional / documented **My recipes** templates unless the filter
+is clearly universal.
 
-1. **Use case** — who benefits and when.
-2. **Template** — with placeholders (`{q}`, `{faves}`, `{faves_hard}`, `{since_7d}`, etc.).
+If you do propose a built-in change, include:
+
+1. **Use case** — why it belongs in the core set (not just custom).
+2. **Template** — placeholders (`{q}`, `{faves}`, `{faves_hard}`, `{since_7d}`, etc.).
 3. **Sample** — one fully rendered example query.
-4. **defaultSort** — `top` or `live`, and whether `requiresQuery` is true.
+4. **What to remove** — if the list grows past ~6, suggest which button loses.
 
-Edit `extension/lib/recipes.js` and keep English-oriented, high-signal defaults.
+Edit `extension/lib/recipes.js`.
 
 ## Code guidelines
 
